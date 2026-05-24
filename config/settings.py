@@ -11,5 +11,5 @@ KAFKA_TOPIC = os.getenv('KAFKA_TOPIC', 'retail-transactions')
 HIGH_VALUE_THRESHOLD = 1000
 OUTLIER_THRESHOLD = 5000
 CONSUMER_GROUP_ID = 'retailstream-consumer-group-v2'
-DB_PATH = 'storage/retailstream.duckdb'
+DB_PATH = 'storage/retailstream.db'
 DASHBOARD_REFRESH_SECONDS = 5
