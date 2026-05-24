@@ -1,0 +1,6 @@
+confluent-kafka==2.14.0
+duckdb
+streamlit
+pandas
+python-dotenv
+faker
