@@ -2,7 +2,7 @@
 
 ## Overview
 A real-time retail event streaming pipeline built with Confluent Cloud Kafka,
-Python, DuckDB, and Streamlit.
+Python, SQLite, and Streamlit.
 
 ## Pipeline Flow
 
@@ -23,12 +23,12 @@ Python, DuckDB, and Streamlit.
   Subscribes to retail-transactions
   Transformer: adds revenue, is_high_value, hour_of_day fields
   Anomaly Detector: flags missing fields, negative amounts, outliers
-  Writes all events to DuckDB
+  Writes all events to SQLite
         |
         v
-[ DuckDB ]
+[ SQLite ]
   Tables: raw_events, anomalies
-  Lightweight embedded analytics database
+  Lightweight embedded database with native concurrent access support
         |
         v
 [ Streamlit Dashboard ]
@@ -40,20 +40,20 @@ Python, DuckDB, and Streamlit.
 
 ## Key Design Decisions
 - Synthetic data generator gives full control over event schema and anomaly injection
-- DuckDB chosen for zero-config embedded analytics storage
+- SQLite chosen for storage due to native support for concurrent reads and writes from separate processes
 - Streamlit chosen for rapid dashboard development without a separate backend
 - Consumer group ID versioned to allow offset reset during development
 
 ## Limitations
 - Single consumer instance (no horizontal scaling in this demo)
-- DuckDB is not suited for concurrent high-volume writes in production
+- SQLite not suited for high-volume concurrent writes in production
 - No schema registry used (JSON serialization only)
-- Dashboard reads directly from DuckDB file (not a live API)
+- Dashboard reads directly from SQLite file (not a live API)
 
 ## Production Improvements
 - Add Avro schema registry for schema enforcement
-- Replace DuckDB with PostgreSQL or Redshift for production storage
+- Replace SQLite with PostgreSQL or Redshift for production storage
 - Add Kafka consumer lag monitoring
 - Add alerting for anomaly spikes
 - Deploy consumer as a containerized service
-- Add dbt models on top of DuckDB for a proper transformation layer
+- Add dbt models on top of the storage layer for a proper transformation layer
