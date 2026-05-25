@@ -1,14 +1,14 @@
 # RetailStream: Real-Time Retail Event Streaming Pipeline
 
-A real-time streaming pipeline that ingests simulated retail transaction events through Confluent Cloud Kafka, transforms and validates them in Python, stores results in SQLite, and visualizes live KPIs on a Streamlit dashboard that updates every 5 seconds.
+> Retail operations teams need live transaction visibility. Batch ETL delivers yesterday's data. This pipeline delivers now.
 
-## Business Problem
+## Problem
 
-Retail operations teams need to monitor transaction health, revenue trends, and store performance in real time. Batch reports from the night before are too slow for operational decisions. This pipeline simulates a retail POS event stream, processes events as they arrive, and surfaces live KPIs so teams can act on what is happening now.
+Retail event systems produce delayed operational insights due to batch ETL latency. Store managers, operations leads, and analytics teams cannot act on data that is 8 to 24 hours old. Anomalies go undetected. Revenue opportunities are missed.
 
-## Target Stakeholder
+## Solution
 
-Retail Operations Manager or Store Analytics team needing live transaction monitoring across locations.
+A real-time streaming pipeline that ingests simulated retail POS events through Confluent Cloud Kafka, transforms and validates them in Python, stores aggregated results in SQLite, and surfaces live KPIs on a Streamlit dashboard that auto-refreshes every 5 seconds.
 
 ## Architecture
 
@@ -28,41 +28,19 @@ flowchart LR
     style F fill:#EEEDFE,stroke:#7F77DD,color:#3C3489
 ```
 
-## Tech Stack
+## Features
 
-| Tool | Purpose |
-|---|---|
-| Confluent Cloud | Managed Kafka broker |
-| Python | Producer and consumer scripts |
-| confluent-kafka | Python Kafka client |
-| SQLite | Lightweight results storage |
-| Streamlit | Live dashboard |
-| pandas | Data transformation |
+- Real-time event ingestion from Confluent Cloud Kafka at 1 event per second
+- Python consumer with transformation layer adding revenue, high-value flag, and hour-of-day fields
+- Anomaly detection flagging missing fields, negative amounts, and outlier transactions above $5,000
+- SQLite storage for raw events and anomaly log
+- Streamlit dashboard with 5-second auto-refresh showing live KPIs and charts
 
-## Project Structure
+## Dashboard Screenshots
 
-```text
-retailstream-kafka-pipeline/
-  producer/
-    producer.py
-  consumer/
-    consumer.py
-    transformer.py
-    anomaly_detector.py
-  storage/
-    db.py
-  dashboard/
-    app.py
-  config/
-    settings.py
-  docs/
-    architecture.md
-  images/
-  .env.example
-  .gitignore
-  README.md
-  requirements.txt
-```
+![Dashboard KPIs](images/dashboard_1.png)
+![Dashboard Charts](images/dashboard_2.png)
+![Consumer Terminal](images/consumer_terminal.png)
 
 ## KPIs
 
@@ -73,26 +51,55 @@ retailstream-kafka-pipeline/
 | High Value Transactions | Events where total amount exceeds $1,000 |
 | Anomalies Detected | Events with missing fields, negative amounts, or outlier prices |
 
-## Setup Instructions
+## Performance Characteristics
 
-### 1. Clone the repo
+| Metric | Value |
+|---|---|
+| Event throughput | 1 event per second (configurable) |
+| Dashboard refresh rate | Every 5 seconds |
+| Kafka partitions | 6 |
+| Anomaly detection latency | Real-time, per event |
 
-```bash
-git clone https://github.com/YOUR_USERNAME/retailstream-kafka-pipeline.git
-cd retailstream-kafka-pipeline
+## Tech Stack
+
+| Tool | Purpose |
+|---|---|
+| Confluent Cloud | Managed Kafka broker, free tier |
+| Python | Producer and consumer pipeline |
+| confluent-kafka | Python Kafka client |
+| SQLite | Lightweight results storage |
+| Streamlit | Live KPI dashboard |
+| pandas | Data transformation |
+
+## Project Structure
+
+```text
+retailstream-kafka-pipeline/
+  producer/
+    producer.py          (event generation and publishing)
+  consumer/
+    consumer.py          (Kafka subscriber and orchestrator)
+    transformer.py       (field enrichment logic)
+    anomaly_detector.py  (validation and flagging)
+  storage/
+    db.py                (SQLite setup and write functions)
+  dashboard/
+    app.py               (Streamlit live dashboard)
+  config/
+    settings.py          (Kafka config, thresholds)
+  .env.example
+  requirements.txt
+  README.md
 ```
 
-### 2. Create virtual environment
+## How to Run
 
 ```bash
+git clone https://github.com/Tarun-B-12/retailstream-kafka-pipeline.git
+cd retailstream-kafka-pipeline
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-```
-
-### 3. Configure environment variables
-
-```bash
 cp .env.example .env
 ```
 
@@ -102,47 +109,34 @@ KAFKA_API_KEY=your_api_key
 KAFKA_API_SECRET=your_api_secret
 KAFKA_TOPIC=retail-transactions
 
-### 4. Run the pipeline
+Then run in three separate terminals:
 
-Terminal 1:
 ```bash
 python producer/producer.py
-```
-
-Terminal 2:
-```bash
 python consumer/consumer.py
-```
-
-Terminal 3:
-```bash
 streamlit run dashboard/app.py --server.fileWatcherType none
 ```
 
-## Dashboard Screenshots
-
-![Dashboard KPIs](images/dashboard_1.png)
-![Dashboard Charts](images/dashboard_2.png)
-![Consumer Terminal](images/consumer_terminal.png)
-
-## Data Quality Checks
-
-- Missing required fields flagged as anomalies
-- Negative or zero transaction amounts flagged
-- Outlier transactions above $5,000 flagged
-- All events tagged with is_high_value and hour_of_day for segmentation
-
 ## Limitations
 
-- Synthetic data only (no real POS integration)
-- SQLite not suited for high-volume production writes
-- No schema registry (JSON serialization only)
-- Single consumer instance
+- Synthetic data only, no real POS integration
+- SQLite is not suited for high-volume production writes. Production version would use PostgreSQL or DuckDB
+- No schema registry, JSON serialization only
+- Single consumer instance, no consumer group scaling
+
+## Future Improvements
+
+- Kubernetes deployment for consumer scaling
+- Schema registry with Avro serialization
+- Dead-letter queue for failed events
+- Replace SQLite with DuckDB or PostgreSQL
+- Add Kafka consumer lag monitoring
+- Connect to a live POS data source
 
 ## What This Project Demonstrates
 
-- Real-time event streaming with Kafka
-- Python producer and consumer architecture
-- Data transformation and anomaly detection
-- Live dashboard with auto-refresh
-- End-to-end pipeline from event generation to visualization
+- Real-time event streaming architecture with Kafka
+- Producer and consumer design patterns
+- Data transformation and anomaly detection in a streaming context
+- Live dashboard with auto-refresh from a streaming data source
+- End-to-end pipeline from synthetic event generation to visualization
