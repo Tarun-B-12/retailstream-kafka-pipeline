@@ -12,35 +12,20 @@ Retail Operations Manager or Store Analytics team needing live transaction monit
 
 ## Architecture
 
-```text
-[ Python Producer ]
-  Generates synthetic retail transaction events
-  Publishes to Confluent Cloud Kafka topic: retail-transactions
-  Rate: 1 event per second
-        |
-        v
-[ Confluent Cloud Kafka ]
-  Managed Kafka broker (free tier)
-  Topic: retail-transactions
-  Partitions: 6
-        |
-        v
-[ Python Consumer ]
-  Subscribes to retail-transactions topic
-  Transformer: adds revenue, is_high_value, hour_of_day fields
-  Anomaly Detector: flags missing fields, negative amounts, outliers
-  Writes all events to SQLite
-        |
-        v
-[ SQLite Database ]
-  Tables: raw_events, anomalies
-        |
-        v
-[ Streamlit Dashboard ]
-  Auto-refreshes every 5 seconds
-  KPIs: Total Revenue, Events, High Value Transactions, Anomalies
-  Charts: Revenue by Category, Top Stores, Revenue by Hour
-  Table: Recent Transactions
+```mermaid
+flowchart LR
+    A[Python Producer\nsynthetic retail events\n1 per second] --> B[Confluent Cloud Kafka\nretail-transactions topic\n6 partitions]
+    B --> C[Python Consumer\ndeserialize + transform]
+    C --> D[Anomaly Detector\nflag missing fields\nnegative amounts, outliers]
+    C --> E[SQLite Database\nraw_events, anomalies]
+    E --> F[Streamlit Dashboard\nauto-refresh every 5 seconds\nlive KPI visualization]
+
+    style A fill:#E6F1FB,stroke:#378ADD,color:#0C447C
+    style B fill:#FAECE7,stroke:#D85A30,color:#712B13
+    style C fill:#EAF3DE,stroke:#639922,color:#27500A
+    style D fill:#FCEBEB,stroke:#E24B4A,color:#791F1F
+    style E fill:#FAEEDA,stroke:#BA7517,color:#633806
+    style F fill:#EEEDFE,stroke:#7F77DD,color:#3C3489
 ```
 
 ## Tech Stack
